@@ -1,0 +1,9 @@
+  Determining projects to restore...
+  Restored /mnt/f/Projects/Paolo/GenAI/RepoGitHUb/azdo/src/DevOpsCli/DevOpsCli.csproj (in 1.32 sec).
+  DevOpsCli -> /tmp/azdo-bin/Release/net8.0/azdo.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:12.55

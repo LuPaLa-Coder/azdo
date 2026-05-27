@@ -1,0 +1,8 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  DevOpsCli -> /tmp/azdo-msbuild/DevOpsCli/bin/Release/net8.0/azdo.dll
+  DevOpsCli.Tests -> /tmp/azdo-msbuild/DevOpsCli.Tests/bin/Release/net8.0/DevOpsCli.Tests.dll
+Test run for /tmp/azdo-msbuild/DevOpsCli.Tests/bin/Release/net8.0/DevOpsCli.Tests.dll (.NETCoreApp,Version=v8.0)
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    35, Skipped:     0, Total:    35, Duration: 81 ms - DevOpsCli.Tests.dll (net8.0)
