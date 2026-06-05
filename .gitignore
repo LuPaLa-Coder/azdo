@@ -47,4 +47,3 @@ coverage/
 *.coveragexml
 
 # Publish output
-publish/
