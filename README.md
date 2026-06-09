@@ -1,6 +1,7 @@
 # devops-cli · `azdo`
 
 > CLI + MCP server in C#/.NET 8 per Azure DevOps — configurazione centrale, zero file per repo.
+> **v0.2.0** — Simplified output, HTTP transport, caching, pagination, middleware pipeline.
 
 [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
@@ -137,11 +138,47 @@ azdo build trigger --definition 42 --branch refs/heads/main
 
 ---
 
+## Novità v0.2.0
+
+- **Simplified output** (`--compact`): riduce il JSON del 70% per risparmiare token LLM. Default `true` nei tool MCP.
+- **HTTP Transport**: `azdo mcp serve --transport http --port 9287` — compatibile con browser-based MCP client.
+- **Caching**: `IMemoryCache` con TTL 60s per chiamate GET ripetute (repo, PR, build).
+- **Paginazione**: `--top`/`--skip` su `repo list`, `pr list`, `wi query`.
+- **Middleware pipeline**: logging automatico, concorrenza controllata (max 4 richieste parallele).
+- **Service layer condiviso**: `IAzdoService` usato sia dalla CLI che dal server MCP.
+
+### Utilizzo HTTP Transport
+
+```bash
+# Avvia server MCP su HTTP (per browser-based client, VS Code web, etc.)
+azdo mcp serve --transport http --port 9287
+
+# Test con curl
+curl -s -X POST http://localhost:9287/mcp \
+  -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}'
+```
+
+### Compact output
+
+```bash
+# CLI: output completo (default)
+azdo pr list
+
+# CLI: output compatto (risparmia token LLM)
+azdo pr list --compact
+
+# MCP: compact è true di default. Per output raw:
+#   {"method":"tools/call","params":{"name":"azdo_pr_list","arguments":{"compact":false}}}
+```
+
+---
+
 ## Struttura sorgenti
 
 ```
 src/DevOpsCli/
-├── Program.cs                       # entry-point, wiring System.CommandLine
+├── Program.cs                       # entry-point, DI container
 ├── Config/
 │   ├── CentralConfig.cs             # modello del config centrale
 │   ├── ConfigStore.cs               # load/save + perms 600
@@ -151,13 +188,30 @@ src/DevOpsCli/
 ├── AzureDevOps/
 │   ├── AzureDevOpsClient.cs         # wrapper HttpClient + PAT Basic auth
 │   └── ClientFactory.cs             # session = detect → ensure PAT → client
+├── Services/
+│   ├── IAzdoService.cs              # interfaccia condivisa CLI/MCP
+│   └── AzdoService.cs               # implementazione
+├── Output/
+│   ├── Dtos.cs                      # DTO compatti (WI, Repo, PR, Build)
+│   └── CompactTransformer.cs        # JsonElement → DTO (~70% riduzione)
+├── Caching/
+│   └── CachedAzdoService.cs         # decorator cache (TTL 60s)
+├── Transport/
+│   ├── IMcpTransport.cs             # interfaccia trasporto MCP
+│   ├── StdioTransport.cs            # stdio (default)
+│   └── HttpTransport.cs             # Streamable HTTP (HttpListener)
+├── Mcp/
+│   ├── McpServer.cs                 # server transport-agnostic
+│   ├── McpTools.cs                  # 12 tool registrati
+│   └── McpMiddleware.cs             # pipeline (logging, concurrency)
 └── Commands/
     ├── ContextCommand.cs
     ├── ConfigCommand.cs
     ├── WorkItemCommand.cs
     ├── RepoCommand.cs
     ├── PullRequestCommand.cs
-    └── BuildCommand.cs
+    ├── BuildCommand.cs
+    └── McpCommand.cs
 ```
 
 ---
@@ -243,6 +297,24 @@ Tutti i tool accettano `org` e `project` come override degli automatismi.
   restituita come `isError: true`. Il setup viene fatto una sola volta da shell normale.
 - **Detection org automatica** — Copilot CLI eredita la `cwd` corrente, quindi
   `OrgDetector` legge il `git remote` della repo attiva senza configurazione aggiuntiva.
+- **HTTP Transport** — alternativo a stdio, per browser-based MCP client (VS Code web,
+  Copilot Chat web). Usa `HttpListener` (zero dipendenze ASP.NET). Endpoint: `POST /mcp`,
+  `GET /sse`, `DELETE /mcp`. Session tracking via header `Mcp-Session-Id`.
+- **Compact output** — nei tool MCP il parametro `compact` è `true` di default.
+  L'output viene trasformato in DTO con solo i campi essenziali (10-15 per entità),
+  riducendo il consumo di token LLM del ~70%.
+
+### HTTP Transport config per Claude Desktop
+
+```json
+{
+  "mcpServers": {
+    "azdo": {
+      "url": "http://localhost:9287/mcp"
+    }
+  }
+}
+```
 
 ---
 
@@ -257,11 +329,15 @@ Tutti i tool accettano `org` e `project` come override degli automatismi.
 
 ## Estensioni naturali
 
-- `azdo config rotate --org X` per ruotare i PAT scaduti.
-- Output strutturato (`--format json|table|csv`).
-- Caching del WIT type per validare i tipi prima della `create`.
-- Provider alternativi per lo storage del PAT (DPAPI / Keychain / libsecret) —
-  vedi `ConfigStore.TryRestrictPermissions` come punto di estensione.
+- ~~Simplified output~~ ✅ **Fatto** (v0.2.0 — `CompactTransformer`, `--compact`)
+- ~~HTTP Transport~~ ✅ **Fatto** (v0.2.0 — `HttpTransport`, `--transport http`)
+- ~~Caching~~ ✅ **Fatto** (v0.2.0 — `CachedAzdoService`, TTL 60s)
+- ~~Paginazione~~ ✅ **Fatto** (v0.2.0 — `--top`/`--skip` su repo, PR, WI)
+- ~~Middleware~~ ✅ **Fatto** (v0.2.0 — `LoggingMiddleware`, `ConcurrencyMiddleware`)
+- ~~Service layer condiviso~~ ✅ **Fatto** (v0.2.0 — `IAzdoService`)
+- OAuth / Entra ID — supporto `Azure.Identity` + `DefaultAzureCredential`
+- Rotazione PAT — `azdo config rotate --org X`
+- Provider alternativi storage PAT (DPAPI / Keychain / libsecret)
 
 ---
 

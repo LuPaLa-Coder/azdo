@@ -1,6 +1,6 @@
 using System.CommandLine;
-using System.Text.Json;
-using DevOpsCli.AzureDevOps;
+using DevOpsCli.Output;
+using DevOpsCli.Services;
 
 namespace DevOpsCli.Commands;
 
@@ -22,36 +22,45 @@ public static class BuildCommand
     {
         var topOpt = new Option<int?>("--top", "Limit");
         var defOpt = new Option<int?>("--definition", "Definition ID filter");
-        var cmd = new Command("list", "List recent builds") { topOpt, defOpt, OrgOpt, ProjectOpt };
-        cmd.SetHandler(async (int? top, int? definition, string? org, string? project) =>
+        var compactOpt = new Option<bool>("--compact", () => false, "Return simplified output");
+        var cmd = new Command("list", "List recent builds") { topOpt, defOpt, compactOpt, OrgOpt, ProjectOpt };
+        cmd.SetHandler(async (int? top, int? definition, bool compact, string? org, string? project) =>
         {
-            using var session = ClientFactory.OpenSession(org, project);
-            RequireProject(session);
-            var qs = new List<string>();
-            if (top.HasValue) qs.Add($"$top={top}");
-            if (definition.HasValue) qs.Add($"definitions={definition}");
-            var query = qs.Count > 0 ? "?" + string.Join('&', qs) : "";
-            var result = await session.Client.GetAsync($"{session.Project}/_apis/build/builds{query}");
-            PrintJson(result);
-        }, topOpt, defOpt, OrgOpt, ProjectOpt);
+            var result = await AppServices.Azdo.ListBuildsAsync(top, definition, org, project);
+            Console.WriteLine(CompactTransformer.Transform(result, compact, "build_list"));
+        }, topOpt, defOpt, compactOpt, OrgOpt, ProjectOpt);
         return cmd;
     }
 
     private static Command BuildStatus()
     {
         var idOpt = new Option<int>("--id", "Build ID") { IsRequired = true };
-        var cmd = new Command("status", "Get build status and timeline") { idOpt, OrgOpt, ProjectOpt };
-        cmd.SetHandler(async (int id, string? org, string? project) =>
+        var compactOpt = new Option<bool>("--compact", () => false, "Return simplified output");
+        var cmd = new Command("status", "Get build status and timeline") { idOpt, compactOpt, OrgOpt, ProjectOpt };
+        cmd.SetHandler(async (int id, bool compact, string? org, string? project) =>
         {
-            using var session = ClientFactory.OpenSession(org, project);
-            RequireProject(session);
-            var build = await session.Client.GetAsync($"{session.Project}/_apis/build/builds/{id}");
-            var timeline = await session.Client.GetAsync($"{session.Project}/_apis/build/builds/{id}/timeline");
-            Console.WriteLine("=== Build ===");
-            PrintJson(build);
-            Console.WriteLine("=== Timeline ===");
-            PrintJson(timeline);
-        }, idOpt, OrgOpt, ProjectOpt);
+            var result = await AppServices.Azdo.GetBuildStatusAsync(id, org, project);
+            if (!compact)
+            {
+                using var doc = System.Text.Json.JsonDocument.Parse(
+                    System.Text.Json.JsonSerializer.Serialize(result));
+                var root = doc.RootElement;
+                Console.WriteLine("=== Build ===");
+                Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(
+                    root.TryGetProperty("build", out var b) ? b : root,
+                    new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
+                if (root.TryGetProperty("timeline", out var tl))
+                {
+                    Console.WriteLine("=== Timeline ===");
+                    Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(tl,
+                        new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
+                }
+            }
+            else
+            {
+                Console.WriteLine(CompactTransformer.Transform(result, true, "build_detail"));
+            }
+        }, idOpt, compactOpt, OrgOpt, ProjectOpt);
         return cmd;
     }
 
@@ -62,25 +71,10 @@ public static class BuildCommand
         var cmd = new Command("trigger", "Trigger a pipeline run") { defOpt, branchOpt, OrgOpt, ProjectOpt };
         cmd.SetHandler(async (int definition, string? branch, string? org, string? project) =>
         {
-            using var session = ClientFactory.OpenSession(org, project);
-            RequireProject(session);
-            object payload = string.IsNullOrWhiteSpace(branch)
-                ? new { definition = new { id = definition } }
-                : new { definition = new { id = definition }, sourceBranch = branch };
-            var body = AzureDevOpsClient.JsonBody(payload);
-            var result = await session.Client.PostAsync($"{session.Project}/_apis/build/builds", body);
-            PrintJson(result);
+            var result = await AppServices.Azdo.TriggerBuildAsync(definition, branch, org, project);
+            Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(result,
+                new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
         }, defOpt, branchOpt, OrgOpt, ProjectOpt);
         return cmd;
     }
-
-    private static void RequireProject(Session s)
-    {
-        if (string.IsNullOrWhiteSpace(s.Project))
-            throw new InvalidOperationException(
-                "Project is required for this operation. Pass --project or set defaultProject on the org.");
-    }
-
-    private static void PrintJson(JsonElement el) =>
-        Console.WriteLine(JsonSerializer.Serialize(el, new JsonSerializerOptions { WriteIndented = true }));
 }

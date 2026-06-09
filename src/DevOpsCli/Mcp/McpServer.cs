@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using DevOpsCli.Transport;
 
 namespace DevOpsCli.Mcp;
 
@@ -13,7 +14,7 @@ public sealed class McpServer
 {
     private const string ProtocolVersion = "2024-11-05";
     private const string ServerName = "azdo";
-    private const string ServerVersion = "0.1.0";
+    private const string ServerVersion = "0.2.0";
 
     private static readonly JsonSerializerOptions WireOpts = new()
     {
@@ -21,27 +22,30 @@ public sealed class McpServer
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
+    private readonly IMcpTransport _transport;
+    private readonly Func<string, object?, Task<object?>> _dispatchPipeline;
+
+    public McpServer(IMcpTransport transport, McpPipeline? pipeline = null)
+    {
+        _transport = transport;
+        _dispatchPipeline = (pipeline ?? new McpPipeline())
+            .Add(new LoggingMiddleware())
+            .Add(new ConcurrencyMiddleware(4))
+            .Build(DispatchAsync);
+    }
+
     public async Task RunAsync(CancellationToken ct = default)
     {
-        Console.Error.WriteLine($"[azdo-mcp] starting (protocol {ProtocolVersion})");
+        Console.Error.WriteLine($"[azdo-mcp] starting (protocol {ProtocolVersion}, version {ServerVersion})");
 
-        var reader = Console.In;
-        var writer = Console.Out;
-
-        string? line;
-        while (!ct.IsCancellationRequested && (line = await reader.ReadLineAsync(ct)) is not null)
+        await _transport.RunAsync(async (line, innerCt) =>
         {
-            if (string.IsNullOrWhiteSpace(line)) continue;
-
             JsonDocument doc;
-            try
-            {
-                doc = JsonDocument.Parse(line);
-            }
+            try { doc = JsonDocument.Parse(line); }
             catch (JsonException ex)
             {
                 Console.Error.WriteLine($"[azdo-mcp] parse error: {ex.Message}");
-                continue;
+                return null;
             }
 
             using (doc)
@@ -55,13 +59,13 @@ public sealed class McpServer
                 {
                     if (method == "notifications/initialized")
                         Console.Error.WriteLine("[azdo-mcp] client initialized");
-                    continue;
+                    return null;
                 }
 
                 object response;
                 try
                 {
-                    var result = await DispatchAsync(method, paramsEl, ct);
+                    var result = await _dispatchPipeline(method!, (object?)paramsEl);
                     response = new { jsonrpc = "2.0", id = idEl, result };
                 }
                 catch (JsonRpcException jre)
@@ -73,44 +77,44 @@ public sealed class McpServer
                     response = new { jsonrpc = "2.0", id = idEl, error = new { code = -32603, message = ex.Message } };
                 }
 
-                await writer.WriteLineAsync(JsonSerializer.Serialize(response, WireOpts));
-                await writer.FlushAsync(ct);
+                return JsonSerializer.Serialize(response, WireOpts);
             }
-        }
+        }, ct);
 
-        Console.Error.WriteLine("[azdo-mcp] stdin closed, exiting");
+        Console.Error.WriteLine("[azdo-mcp] transport closed, exiting");
     }
 
-    private static async Task<object> DispatchAsync(string? method, JsonElement? args, CancellationToken ct) => method switch
+    private static async Task<object?> DispatchAsync(string method, object? args)
     {
-        "initialize" => InitializeResult(),
-        "tools/list" => new { tools = McpTools.All.Select(t => t.ToManifest()).ToArray() },
-        "tools/call" => await CallToolAsync(args, ct),
-        "ping" => new { },
-        _ => throw new JsonRpcException(-32601, $"Method not found: {method}")
-    };
+        return method switch
+        {
+            "initialize" => new
+            {
+                protocolVersion = ProtocolVersion,
+                capabilities = new { tools = new { } },
+                serverInfo = new { name = ServerName, version = ServerVersion }
+            },
+            "tools/list" => new { tools = McpTools.All.Select(t => t.ToManifest()).ToArray() },
+            "tools/call" => await CallToolAsync(args),
+            "ping" => new { },
+            _ => throw new JsonRpcException(-32601, $"Method not found: {method}")
+        };
+    }
 
-    private static object InitializeResult() => new
+    private static async Task<object> CallToolAsync(object? args)
     {
-        protocolVersion = ProtocolVersion,
-        capabilities = new { tools = new { } },
-        serverInfo = new { name = ServerName, version = ServerVersion }
-    };
-
-    private static async Task<object> CallToolAsync(JsonElement? args, CancellationToken ct)
-    {
-        if (args is null) throw new JsonRpcException(-32602, "missing params");
-        var nameEl = args.Value.TryGetProperty("name", out var n) ? n : default;
+        if (args is not JsonElement je) throw new JsonRpcException(-32602, "missing params");
+        var nameEl = je.TryGetProperty("name", out var n) ? n : default;
         if (nameEl.ValueKind != JsonValueKind.String) throw new JsonRpcException(-32602, "tool name required");
         var name = nameEl.GetString()!;
-        var argsObj = args.Value.TryGetProperty("arguments", out var a) ? a : default;
+        var argsObj = je.TryGetProperty("arguments", out var a) ? a : default;
 
         var tool = McpTools.All.FirstOrDefault(t => t.Name == name)
             ?? throw new JsonRpcException(-32602, $"Unknown tool: {name}");
 
         try
         {
-            var text = await tool.Handler(argsObj, ct);
+            var text = await tool.Handler(argsObj, CancellationToken.None);
             return new
             {
                 content = new[] { new { type = "text", text } },

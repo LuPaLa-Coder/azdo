@@ -1,39 +1,34 @@
 {
   "format": 1,
   "restore": {
-    "F:\\Projects\\Paolo\\GenAI\\RepoGitHUb\\azdo\\src\\DevOpsCli.Tests\\DevOpsCli.Tests.csproj": {}
+    "/Users/paolo/repo/GitHUbLupala/azdo/src/DevOpsCli.Tests/DevOpsCli.Tests.csproj": {}
   },
   "projects": {
-    "F:\\Projects\\Paolo\\GenAI\\RepoGitHUb\\azdo\\src\\DevOpsCli.Tests\\DevOpsCli.Tests.csproj": {
+    "/Users/paolo/repo/GitHUbLupala/azdo/src/DevOpsCli.Tests/DevOpsCli.Tests.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Projects\\Paolo\\GenAI\\RepoGitHUb\\azdo\\src\\DevOpsCli.Tests\\DevOpsCli.Tests.csproj",
+        "projectUniqueName": "/Users/paolo/repo/GitHUbLupala/azdo/src/DevOpsCli.Tests/DevOpsCli.Tests.csproj",
         "projectName": "DevOpsCli.Tests",
-        "projectPath": "F:\\Projects\\Paolo\\GenAI\\RepoGitHUb\\azdo\\src\\DevOpsCli.Tests\\DevOpsCli.Tests.csproj",
-        "packagesPath": "C:\\Users\\paoli\\.nuget\\packages\\",
-        "outputPath": "F:\\Projects\\Paolo\\GenAI\\RepoGitHUb\\azdo\\src\\DevOpsCli.Tests\\obj\\",
+        "projectPath": "/Users/paolo/repo/GitHUbLupala/azdo/src/DevOpsCli.Tests/DevOpsCli.Tests.csproj",
+        "packagesPath": "/Users/paolo/.nuget/packages/",
+        "outputPath": "/Users/paolo/repo/GitHUbLupala/azdo/src/DevOpsCli.Tests/obj/",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\paoli\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "/Users/paolo/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
+            "framework": "net8.0",
             "targetAlias": "net8.0",
             "projectReferences": {
-              "F:\\Projects\\Paolo\\GenAI\\RepoGitHUb\\azdo\\src\\DevOpsCli\\DevOpsCli.csproj": {
-                "projectPath": "F:\\Projects\\Paolo\\GenAI\\RepoGitHUb\\azdo\\src\\DevOpsCli\\DevOpsCli.csproj"
+              "/Users/paolo/repo/GitHUbLupala/azdo/src/DevOpsCli/DevOpsCli.csproj": {
+                "projectPath": "/Users/paolo/repo/GitHUbLupala/azdo/src/DevOpsCli/DevOpsCli.csproj"
               }
             }
           }
@@ -48,10 +43,11 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "10.0.200"
+        "SdkAnalysisLevel": "10.0.300"
       },
       "frameworks": {
         "net8.0": {
+          "framework": "net8.0",
           "targetAlias": "net8.0",
           "dependencies": {
             "Microsoft.NET.Test.Sdk": {
@@ -82,55 +78,36 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "downloadDependencies": [
-            {
-              "name": "Microsoft.AspNetCore.App.Ref",
-              "version": "[8.0.26, 8.0.26]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Ref",
-              "version": "[8.0.26, 8.0.26]"
-            },
-            {
-              "name": "Microsoft.WindowsDesktop.App.Ref",
-              "version": "[8.0.26, 8.0.26]"
-            }
-          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.203/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/10.0.300/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "F:\\Projects\\Paolo\\GenAI\\RepoGitHUb\\azdo\\src\\DevOpsCli\\DevOpsCli.csproj": {
+    "/Users/paolo/repo/GitHUbLupala/azdo/src/DevOpsCli/DevOpsCli.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Projects\\Paolo\\GenAI\\RepoGitHUb\\azdo\\src\\DevOpsCli\\DevOpsCli.csproj",
+        "projectUniqueName": "/Users/paolo/repo/GitHUbLupala/azdo/src/DevOpsCli/DevOpsCli.csproj",
         "projectName": "azdo",
-        "projectPath": "F:\\Projects\\Paolo\\GenAI\\RepoGitHUb\\azdo\\src\\DevOpsCli\\DevOpsCli.csproj",
-        "packagesPath": "C:\\Users\\paoli\\.nuget\\packages\\",
-        "outputPath": "F:\\Projects\\Paolo\\GenAI\\RepoGitHUb\\azdo\\src\\DevOpsCli\\obj\\",
+        "projectPath": "/Users/paolo/repo/GitHUbLupala/azdo/src/DevOpsCli/DevOpsCli.csproj",
+        "packagesPath": "/Users/paolo/.nuget/packages/",
+        "outputPath": "/Users/paolo/repo/GitHUbLupala/azdo/src/DevOpsCli/obj/",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\paoli\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "/Users/paolo/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
+            "framework": "net8.0",
             "targetAlias": "net8.0",
             "projectReferences": {}
           }
@@ -145,16 +122,25 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "10.0.200"
+        "SdkAnalysisLevel": "10.0.300"
       },
       "frameworks": {
         "net8.0": {
+          "framework": "net8.0",
           "targetAlias": "net8.0",
           "dependencies": {
+            "Microsoft.Extensions.Caching.Memory": {
+              "target": "Package",
+              "version": "[8.0.1, )"
+            },
+            "Microsoft.Extensions.DependencyInjection": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
             "Microsoft.NET.ILLink.Tasks": {
               "suppressParent": "All",
               "target": "Package",
-              "version": "[8.0.26, )",
+              "version": "[8.0.27, )",
               "autoReferenced": true
             },
             "System.CommandLine": {
@@ -175,32 +161,12 @@
           "warn": true,
           "downloadDependencies": [
             {
-              "name": "Microsoft.AspNetCore.App.Ref",
-              "version": "[8.0.26, 8.0.26]"
+              "name": "Microsoft.AspNetCore.App.Runtime.osx-arm64",
+              "version": "[8.0.27, 8.0.27]"
             },
             {
-              "name": "Microsoft.AspNetCore.App.Runtime.win-x64",
-              "version": "[8.0.26, 8.0.26]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Host.win-x64",
-              "version": "[8.0.26, 8.0.26]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Ref",
-              "version": "[8.0.26, 8.0.26]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Runtime.win-x64",
-              "version": "[8.0.26, 8.0.26]"
-            },
-            {
-              "name": "Microsoft.WindowsDesktop.App.Ref",
-              "version": "[8.0.26, 8.0.26]"
-            },
-            {
-              "name": "Microsoft.WindowsDesktop.App.Runtime.win-x64",
-              "version": "[8.0.26, 8.0.26]"
+              "name": "Microsoft.NETCore.App.Runtime.osx-arm64",
+              "version": "[8.0.27, 8.0.27]"
             }
           ],
           "frameworkReferences": {
@@ -208,11 +174,11 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.203/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/10.0.300/PortableRuntimeIdentifierGraph.json"
         }
       },
       "runtimes": {
-        "win-x64": {
+        "osx-arm64": {
           "#import": []
         }
       }

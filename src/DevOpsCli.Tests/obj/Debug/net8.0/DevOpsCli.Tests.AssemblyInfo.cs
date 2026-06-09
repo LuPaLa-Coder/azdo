@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DevOpsCli.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+812440b535201666214b452859cad87f643be891")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+eadf56eed6422caa8652c2a302a58e3dcbe8f3a9")]
 [assembly: System.Reflection.AssemblyProductAttribute("DevOpsCli.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DevOpsCli.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
